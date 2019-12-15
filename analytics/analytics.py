@@ -1,4 +1,3 @@
-#from __future__ import print_function
 import pickle
 import os.path
 import re
@@ -7,28 +6,9 @@ from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 
-# If modifying these scopes, delete the file token.pickle.
-SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
-
-def findBetween(s, first, last):
-    try:
-        start = s.index(first) + len(first)
-    except ValueError:
-        start = 0
-
-    try:
-        if not last:
-            end = len(s)
-        else:
-            end = s.index(last, start)
-    except ValueError:
-        end = len(s)
-
-    return s[start:end]
-
 def getAfterDomain(url):
-    result = findBetween(url, '//', '')
-    result = findBetween(result, '/', '')
+    result = helpers.findBetween(url, '//', '')
+    result = helpers.findBetween(result, '/', '')
 
     if len(url) > 0 and url[-1] == '/':
         result = result[:-1]
@@ -50,6 +30,9 @@ def main():
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
+            # If modifying these scopes, delete the file token.pickle.
+            SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
+
             flow = InstalledAppFlow.from_client_secrets_file(
                 'credentials.json', SCOPES)
             creds = flow.run_local_server(port=0)
@@ -57,7 +40,14 @@ def main():
         with open('token.pickle', 'wb') as token:
             pickle.dump(creds, token)
 
-    SAMPLE_SPREADSHEET_ID = 
+    spreadsheetId = helpers.getFile('options.ini')
+    spreadsheetId = helpers.findBetween(spreadsheetId, '=', '')
+
+    if not spreadsheetId:
+        while not spreadsheetId:
+            spreadsheetId = input('Paste your spreadsheet id here: ')
+    
+    print('Getting spreadsheet')
     
     service = build('sheets', 'v4', credentials=creds)
 
@@ -65,8 +55,7 @@ def main():
     sheet = service.spreadsheets()
     
     try:
-        print('Getting spreadsheet')
-        result = sheet.values().get(spreadsheetId=SAMPLE_SPREADSHEET_ID, range='A:B').execute()
+        result = sheet.values().get(spreadsheetId=spreadsheetId, range='A:A').execute()
         values = result.get('values', [])
     except:
         print('Error: could not get the spreadsheet. Stopping.')
@@ -85,6 +74,10 @@ def main():
     maximumRegexLength = 7000
 
     for row in values:
+        if not row:
+            i += 1
+            continue
+
         print('On row %d: %s' % (i, row[0]))
 
         partAfterDomain = getAfterDomain(row[0])
@@ -96,7 +89,7 @@ def main():
             continue
 
         #reached length limit?
-        if len(currentRow) + len(regex) >= maximumRegexLength:
+        if row[0] and len(currentRow) + len(regex) >= maximumRegexLength:
             #remove extra character if needed
             if currentRow and currentRow[-1] == '|' and currentRow[-2:-1] != '\|':
                 currentRow = currentRow[:-1]
@@ -114,7 +107,7 @@ def main():
             #add to current row
             currentRow += regex;
 
-        if i < len(values) - 1:
+        if row[0] and i < len(values) - 1:
             currentRow += '|'
 
         i += 1
@@ -136,7 +129,7 @@ def main():
     result = 'success'
     
     try:
-        result = sheet.values().update(spreadsheetId=SAMPLE_SPREADSHEET_ID, range='B:B', valueInputOption='RAW', body=Body).execute()
+        result = sheet.values().update(spreadsheetId=spreadsheetId, range='B:B', valueInputOption='RAW', body=Body).execute()
         print('Updated the spreadsheet successfully')
         print('Done')
     except Exception as e:
@@ -145,6 +138,8 @@ def main():
         print('')
         print('Something went wrong when trying to update the spreadsheet')
         print('Exiting')
+        
+    input("Press Enter to continue...")
 
 if __name__ == '__main__':
     main()

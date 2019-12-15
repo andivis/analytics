@@ -4,9 +4,9 @@ import os.path
 
 def getFile(fileName):
     if not os.path.isfile(fileName):
-        return ""
+        return ''
 
-    f = open(fileName, "r")
+    f = open(fileName, 'r')
     return f.read()
 
 
@@ -19,12 +19,12 @@ def getLines(fileName):
 
 
 def toFile(s, fileName):
-    with io.open(fileName, "w", encoding="utf-8") as text_file:
+    with io.open(fileName, 'w', encoding='utf-8') as text_file:
         print(s, file=text_file)
 
 
 def appendToFile(s, fileName):
-    with io.open(fileName, "a", encoding="utf-8") as text_file:
+    with io.open(fileName, 'a', encoding='utf-8') as text_file:
         print(s, file=text_file)
 
 
@@ -65,15 +65,15 @@ def getNested(j, keys):
 
             i += 1
     except:
-        return ""
+        return ''
 
 def stringToFloatingPoint(s):
     result = 0.0
 
-    temporary = ""
+    temporary = ''
 
     for c in s:
-        if c.isdigit() or c == ".":
+        if c.isdigit() or c == '.':
             temporary += c
 
     try:
