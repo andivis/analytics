@@ -2,7 +2,7 @@
 
 ## Installation
 
-1. Make sure you have Python version 3 or higher installed
+1. Make sure you have Python version 3.8 or higher installed
 2. Run the command below in a command prompt. Or if you're on Windows, just run the file called `run-windows.bat`.
 
 ```
