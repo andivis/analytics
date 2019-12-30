@@ -2,6 +2,7 @@
 /.vs
 *.sln
 *.pyproj
+*.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
